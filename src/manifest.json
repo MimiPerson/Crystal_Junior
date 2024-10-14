@@ -1,0 +1,44 @@
+{
+  "name": "__MSG_appName__",
+  "short_name": "__MSG_appShortName__",
+  "description": "__MSG_appDescription__",
+  "homepage_url": "http://chrome.google.com/webstore",
+  "version": "0.0.1",
+  "version_name": "0.0.1",
+  "manifest_version": 3,
+  "default_locale": "en",
+  "minimum_chrome_version": "88",
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs",
+    "background"
+  ],
+  "host_permissions": ["https://www.youtube.com/*", "ws://127.0.0.1:8080/"],
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; connect-src 'self' ws://127.0.0.1:8080 https://www.youtube.com"
+  },
+  "icons": {
+    "128": "assets/img/128x128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "assets/img/16x16.png",
+      "24": "assets/img/24x24.png",
+      "32": "assets/img/32x32.png"
+    },
+    "default_popup": "popup.html",
+    "default_title": "__MSG_appName__"
+  }
+}

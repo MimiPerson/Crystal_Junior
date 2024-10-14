@@ -1,0 +1,11 @@
+{
+    "appName": {
+        "message": "Crystal Junior"
+    },
+    "appShortName": {
+        "message": "Crystal Junior"
+    },
+    "appDescription": {
+        "message": "Sends browser data to Crystal cat"
+    }
+}

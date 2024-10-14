@@ -1,0 +1,61 @@
+{
+  "name": "crystal-junior",
+  "description": "Sends browser data to Crystal cat",
+  "version": "0.0.1",
+  "homepage": "http://chrome.google.com/webstore",
+  "author": "Mimi_py",
+  "repository": {
+    "type": "git",
+    "url": "ENTER GIT REPO URL"
+  },
+  "scripts": {
+    "start": "xt-build -e dev -w",
+    "start:firefox": "xt-build -e dev -p firefox -w",
+    "build": "xt-build -e prod",
+    "build:firefox": "xt-build -e prod -p firefox",
+    "clean": "xt-clean",
+    "docs": "xt-docs",
+    "test": "xt-test",
+    "coverage": "nyc --reporter=lcov npm run test",
+    "sync": "xt-sync"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "eslintIgnore": [
+    "test/**/*"
+  ],
+  "devDependencies": {
+    "extension-cli": "latest"
+  },
+  "xtdocs": {
+    "source": {
+      "include": [
+        "README.md",
+        "src"
+      ]
+    }
+  },
+  "xtbuild": {
+    "js_bundles": [
+      {
+        "name": "background",
+        "src": "./src/**/background.js"
+      },
+      {
+        "name": "content",
+        "src": "./src/**/content.js"
+      },
+      {
+        "name": "popup",
+        "src": "./src/**/popup.js"
+      }
+    ]
+  },
+  "dependencies": {
+    "@streamerbot/client": "^1.8.2",
+    "socket.io-client": "^4.8.0"
+  }
+}
