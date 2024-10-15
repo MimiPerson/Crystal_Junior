@@ -1,39 +1,70 @@
-# Crystal Junior
+# Chrome Extension TypeScript Starter
 
-Sends browser data to Crystal cat
+![build](https://github.com/chibat/chrome-extension-typescript-starter/workflows/build/badge.svg)
 
-## Development 
+Chrome Extension, TypeScript and Visual Studio Code
 
-This extension was created with [Extension CLI](https://oss.mobilefirst.me/extension-cli/)!
+## Prerequisites
 
-If you find this software helpful [star](https://github.com/MobileFirstLLC/extension-cli/) or [sponsor](https://github.com/sponsors/MobileFirstLLC) this project.
+* [node + npm](https://nodejs.org/) (Current Version)
 
+## Option
 
-### Available Commands
+* [Visual Studio Code](https://code.visualstudio.com/)
 
-| Commands | Description |
-| --- | --- |
-| `npm run start` | build extension, watch file changes |
-| `npm run build` | generate release version |
-| `npm run docs` | generate source code docs |
-| `npm run clean` | remove temporary files |
-| `npm run test` | run unit tests |
-| `npm run sync` | update config files |
+## Includes the following
 
-For CLI instructions see [User Guide &rarr;](https://oss.mobilefirst.me/extension-cli/)
+* TypeScript
+* Webpack
+* React
+* Jest
+* Example Code
+    * Chrome Storage
+    * Options Version 2
+    * content script
+    * count up badge number
+    * background
 
-### Learn More
+## Project Structure
 
-**Extension Developer guides**
+* src/typescript: TypeScript source files
+* src/assets: static files
+* dist: Chrome Extension directory
+* dist/js: Generated JavaScript files
 
-- [Getting started with extension development](https://developer.chrome.com/extensions/getstarted)
-- Manifest configuration: [version 2](https://developer.chrome.com/extensions/manifest) - [version 3](https://developer.chrome.com/docs/extensions/mv3/intro/)
-- [Permissions reference](https://developer.chrome.com/extensions/declare_permissions)
-- [Chrome API reference](https://developer.chrome.com/docs/extensions/reference/)
+## Setup
 
-**Extension Publishing Guides**
+```
+npm install
+```
 
-- [Publishing for Chrome](https://developer.chrome.com/webstore/publish)
-- [Publishing for Edge](https://docs.microsoft.com/en-us/microsoft-edge/extensions-chromium/publish/publish-extension)
-- [Publishing for Opera addons](https://dev.opera.com/extensions/publishing-guidelines/)
-- [Publishing for Firefox](https://extensionworkshop.com/documentation/publish/submitting-an-add-on/)
+## Import as Visual Studio Code project
+
+...
+
+## Build
+
+```
+npm run build
+```
+
+## Build in watch mode
+
+### terminal
+
+```
+npm run watch
+```
+
+### Visual Studio Code
+
+Run watch mode.
+
+type `Ctrl + Shift + B`
+
+## Load extension to chrome
+
+Load `dist` directory
+
+## Test
+`npx jest` or `npm run test`

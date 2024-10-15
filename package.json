@@ -1,61 +1,39 @@
 {
-  "name": "crystal-junior",
-  "description": "Sends browser data to Crystal cat",
-  "version": "0.0.1",
-  "homepage": "http://chrome.google.com/webstore",
-  "author": "Mimi_py",
+  "name": "Crystal Junior",
+  "version": "1.0.0",
+  "description": "Sends browser data to Streamer.bot",
+  "scripts": {
+    "watch": "webpack --config webpack/webpack.dev.js --watch",
+    "build": "webpack --config webpack/webpack.prod.js",
+    "clean": "rimraf dist",
+    "test": "npx jest",
+    "style": "prettier --write \"src/**/*.{ts,tsx}\""
+  },
+  "author": "",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "ENTER GIT REPO URL"
-  },
-  "scripts": {
-    "start": "xt-build -e dev -w",
-    "start:firefox": "xt-build -e dev -p firefox -w",
-    "build": "xt-build -e prod",
-    "build:firefox": "xt-build -e prod -p firefox",
-    "clean": "xt-clean",
-    "docs": "xt-docs",
-    "test": "xt-test",
-    "coverage": "nyc --reporter=lcov npm run test",
-    "sync": "xt-sync"
-  },
-  "babel": {
-    "presets": [
-      "@babel/preset-env"
-    ]
-  },
-  "eslintIgnore": [
-    "test/**/*"
-  ],
-  "devDependencies": {
-    "extension-cli": "latest"
-  },
-  "xtdocs": {
-    "source": {
-      "include": [
-        "README.md",
-        "src"
-      ]
-    }
-  },
-  "xtbuild": {
-    "js_bundles": [
-      {
-        "name": "background",
-        "src": "./src/**/background.js"
-      },
-      {
-        "name": "content",
-        "src": "./src/**/content.js"
-      },
-      {
-        "name": "popup",
-        "src": "./src/**/popup.js"
-      }
-    ]
+    "url": "https://github.com/chibat/chrome-extension-typescript-starter.git"
   },
   "dependencies": {
-    "@streamerbot/client": "^1.8.2",
-    "socket.io-client": "^4.8.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.278",
+    "@types/jest": "^29.5.0",
+    "@types/react": "^18.0.29",
+    "@types/react-dom": "^18.0.11",
+    "copy-webpack-plugin": "^9.0.1",
+    "glob": "^7.1.6",
+    "jest": "^29.5.0",
+    "prettier": "^2.2.1",
+    "rimraf": "^3.0.2 ",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^8.0.0",
+    "typescript": "^5.6.3",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^4.0.0",
+    "webpack-merge": "^5.0.0"
   }
 }
