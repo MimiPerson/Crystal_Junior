@@ -1,10 +1,79 @@
 import { StreamerbotClient } from "@streamerbot/client";
-
 // Global variable to hold messages until WebSocket is open
 let songQueue: string[] = [];
 
-// Initialize WebSocket connection to Streamer.bot
-const client = new StreamerbotClient();
+// Event Handlers
+const eventHandler: { [key: string]: (arg?: any) => void } = {
+  setVolume: function (volume: string | null) {
+    runInActiveTabs((volume: string | null) => {
+      if (!volume) return console.log("volume not found");
+      const parsedVolume = parseFloat(volume.replace(",", "."));
+
+      const video = document.querySelector("video") as HTMLVideoElement;
+      if (video) {
+        video.volume = parsedVolume;
+      }
+    }, volume);
+  },
+  // addToQueue: function (url: string) {
+  //   if (url) {
+  //     client.doAction("d3f3cfe4-6352-42d5-9531-820a5143276e", {
+  //       reply: "Successfully added song to queue",
+  //     });
+  //     songQueue.push(url);
+  //   }
+  // },
+
+  nextSong: function () {
+    if (songQueue.length > 0) {
+      console.log("playing queue");
+      const youtubeLink = songQueue.shift();
+      runInActiveTabs((url: string) => {
+        window.location.href = url;
+      }, youtubeLink);
+      return;
+    }
+    runInActiveTabs(() => {
+      const nextSongButton = document.querySelector(
+        ".ytp-next-button"
+      ) as HTMLButtonElement | null;
+      if (nextSongButton) {
+        nextSongButton.click();
+        console.log("Song skipped");
+      } else {
+        console.log("Song not skipped");
+      }
+    });
+  },
+
+  songRequest: function (url: string) {
+    runInActiveTabs((variables: string) => {
+      console.log(variables);
+      location.href = variables;
+    }, url);
+  },
+};
+
+// // Initialize WebSocket connection to Streamer.bot
+const client = new StreamerbotClient({
+  onConnect: () => {
+    client.on("General.*", (event) => {
+      runInActiveTabs((event: any) => {
+        console.log("General event: ", event);
+      }, event);
+      if (event.data) {
+        const data = event.data;
+        if (eventHandler.hasOwnProperty(data.func)) {
+          eventHandler[data.func](data.variables ? data.variables : null);
+        }
+      }
+    });
+  },
+});
+
+client.on("WebsocketClient.Close", (event) => {
+  console.error("Websocket closed with error: ", event);
+});
 
 // Listen for the extension installation event
 chrome.runtime.onInstalled.addListener(async () => {
@@ -43,70 +112,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     console.warn("No content scripts defined in the manifest.");
   }
 });
-
-client.on("General.*", (event) => {
-  if (event.data) {
-    const data = event.data;
-    if (eventHandler.hasOwnProperty(data.func)) {
-      eventHandler[data.func](data.variables ? data.variables : null);
-    }
-  }
-});
-client.on("WebsocketClient.Close", (event) => {
-  console.log("Websocket closed with error: ", event);
-});
-
-// Event Handlers
-const eventHandler: { [key: string]: (arg?: any) => void } = {
-  setVolume: function (volume: string | null) {
-    runInActiveTabs((volume: string | null) => {
-      if (!volume) return console.log("volume not found");
-      const parsedVolume = parseFloat(volume.replace(",", "."));
-
-      const video = document.querySelector("video") as HTMLVideoElement;
-      if (video) {
-        video.volume = parsedVolume;
-      }
-    }, volume);
-  },
-  addToQueue: function (url: string) {
-    if (url) {
-      client.doAction("d3f3cfe4-6352-42d5-9531-820a5143276e", {
-        reply: "Successfully added song to queue",
-      });
-      songQueue.push(url);
-    }
-  },
-
-  nextSong: function () {
-    if (songQueue.length > 0) {
-      console.log("playing queue");
-      const youtubeLink = songQueue.shift();
-      runInActiveTabs((url: string) => {
-        window.location.href = url;
-      }, youtubeLink);
-      return;
-    }
-    runInActiveTabs(() => {
-      const nextSongButton = document.querySelector(
-        ".ytp-next-button"
-      ) as HTMLButtonElement | null;
-      if (nextSongButton) {
-        nextSongButton.click();
-        console.log("Song skipped");
-      } else {
-        console.log("Song not skipped");
-      }
-    });
-  },
-
-  songRequest: function (url: string) {
-    runInActiveTabs((variables: string) => {
-      console.log(variables);
-      location.href = variables;
-    }, url);
-  },
-};
 
 // Run a function in all active tabs
 /**
@@ -166,78 +171,78 @@ async function runInActiveTabs(functionToRun: Function, variables?: any) {
   }
 }
 
-/**
- * Throttles a function to prevent it from being called too frequently.
- *
- * @param func - The function to throttle.
- * @param delay - The delay in milliseconds to wait before calling the throttled function.
- *
- * @returns A throttled version of the input function.
- *
- * @remarks
- * This function creates a throttled version of the input function. The throttled function will only be called once after the specified delay has passed since the last time it was invoked.
- * If the throttled function is invoked again before the delay has elapsed, the timer will be reset, and the delay will start again.
- *
- * @example
- * const throttledFunction = throttle(() => console.log("Throttled function called"), 1000);
- * throttledFunction(); // Will be called immediately
- * throttledFunction(); // Will not be called again until 1 second has passed
- */
-function throttle(func: Function, delay: number) {
-  let isThrottled = false;
-  let lastArgs: any[] | null = null;
+// /**
+//  * Throttles a function to prevent it from being called too frequently.
+//  *
+//  * @param func - The function to throttle.
+//  * @param delay - The delay in milliseconds to wait before calling the throttled function.
+//  *
+//  * @returns A throttled version of the input function.
+//  *
+//  * @remarks
+//  * This function creates a throttled version of the input function. The throttled function will only be called once after the specified delay has passed since the last time it was invoked.
+//  * If the throttled function is invoked again before the delay has elapsed, the timer will be reset, and the delay will start again.
+//  *
+//  * @example
+//  * const throttledFunction = throttle(() => console.log("Throttled function called"), 1000);
+//  * throttledFunction(); // Will be called immediately
+//  * throttledFunction(); // Will not be called again until 1 second has passed
+//  */
+// function throttle(func: Function, delay: number) {
+//   let isThrottled = false;
+//   let lastArgs: any[] | null = null;
 
-  return function (this: any, ...args: any[]) {
-    if (isThrottled) {
-      // If a call happens during the throttle, store the latest arguments
-      lastArgs = args;
-      return;
-    }
+//   return function (this: any, ...args: any[]) {
+//     if (isThrottled) {
+//       // If a call happens during the throttle, store the latest arguments
+//       lastArgs = args;
+//       return;
+//     }
 
-    func.apply(this, args); // Run the function immediately
-    isThrottled = true;
+//     func.apply(this, args); // Run the function immediately
+//     isThrottled = true;
 
-    setTimeout(() => {
-      isThrottled = false; // Allow new calls after delay
+//     setTimeout(() => {
+//       isThrottled = false; // Allow new calls after delay
 
-      // If a call was queued during the throttle, run it now with the last arguments
-      if (lastArgs) {
-        func.apply(this, lastArgs);
-        lastArgs = null; // Clear the stored arguments after executing
-      }
-    }, delay);
-  };
-}
+//       // If a call was queued during the throttle, run it now with the last arguments
+//       if (lastArgs) {
+//         func.apply(this, lastArgs);
+//         lastArgs = null; // Clear the stored arguments after executing
+//       }
+//     }, delay);
+//   };
+// }
 
-// Handle YouTube events
-/**
- * Handles YouTube events received from the content script.
- *
- * @remarks
- * This function listens for YouTube events such as "ended" and performs specific actions based on the received event.
- * When the "ended" event is received, it checks if there are songs in the `songQueue` and navigates to the next song if available.
- *
- * @param request - The request object containing the YouTube event data.
- * @param request.data - An array containing the YouTube event data. The first element of the array is the event type.
- *
- * @returns {Promise<void>} - A promise that resolves when the function completes.
- *
- * @example
- * // Example usage
- * HandleYoutubeEvents({ data: ["ended"] });
- */
-async function HandleYoutubeEvents(request: { data: any[] }) {
-  switch (request.data[0]) {
-    case "ended":
-      if (songQueue.length > 0) {
-        const youtubeLink = songQueue.shift();
-        runInActiveTabs((url: string) => {
-          window.location.href = url;
-        }, youtubeLink);
-      }
-      break;
-  }
-}
+// // Handle YouTube events
+// /**
+//  * Handles YouTube events received from the content script.
+//  *
+//  * @remarks
+//  * This function listens for YouTube events such as "ended" and performs specific actions based on the received event.
+//  * When the "ended" event is received, it checks if there are songs in the `songQueue` and navigates to the next song if available.
+//  *
+//  * @param request - The request object containing the YouTube event data.
+//  * @param request.data - An array containing the YouTube event data. The first element of the array is the event type.
+//  *
+//  * @returns {Promise<void>} - A promise that resolves when the function completes.
+//  *
+//  * @example
+//  * // Example usage
+//  * HandleYoutubeEvents({ data: ["ended"] });
+//  */
+// async function HandleYoutubeEvents(request: { data: any[] }) {
+//   switch (request.data[0]) {
+//     case "ended":
+//       if (songQueue.length > 0) {
+//         const youtubeLink = songQueue.shift();
+//         runInActiveTabs((url: string) => {
+//           window.location.href = url;
+//         }, youtubeLink);
+//       }
+//       break;
+//   }
+// }
 
 // Listen for messages from the content.js
 chrome.runtime.onMessage.addListener(
@@ -248,7 +253,7 @@ chrome.runtime.onMessage.addListener(
   ) => {
     switch (request.type) {
       case "youtubeEvent":
-        HandleYoutubeEvents(request);
+        //HandleYoutubeEvents(request);
         break;
       case "titleUpdate":
         client.doAction("e4b9e04a-5afb-4dbb-8724-a63e9c3c6e1c", request.data);

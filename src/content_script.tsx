@@ -94,7 +94,11 @@ function onVideoLoad() {
       };
 
       // Send the message to the background script
-      chrome.runtime.sendMessage({ type: "titleUpdate", data: message });
+      chrome.runtime
+        .sendMessage({ type: "titleUpdate", data: message })
+        .catch((error) => {
+          console.log("Error sending message to background script:", error);
+        });
     }
   }
 }
@@ -104,17 +108,13 @@ const debouncedOnVideoLoad = debounce(onVideoLoad, DEBOUNCE_DELAY);
 
 // Create a MutationObserver to watch for changes in the DOM
 const observer = new MutationObserver(() => {
-  try {
-    // Check if any mutation is related to the childList of the video title element
-    const videoTitleElement = document.querySelector(
-      "yt-formatted-string.style-scope.ytd-watch-metadata"
-    );
+  // Check if any mutation is related to the childList of the video title element
+  const videoTitleElement = document.querySelector(
+    "yt-formatted-string.style-scope.ytd-watch-metadata"
+  );
 
-    if (videoTitleElement) {
-      debouncedOnVideoLoad();
-    }
-  } catch (error) {
-    console.error("Error in MutationObserver:", error);
+  if (videoTitleElement) {
+    debouncedOnVideoLoad();
   }
 });
 
