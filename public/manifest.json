@@ -30,8 +30,7 @@
     "storage",
     "activeTab",
     "scripting",
-    "tabs",
-    "background"
+    "tabs"
   ],
 
   "host_permissions": ["https://www.youtube.com/*", "ws://127.0.0.1:8080/"],

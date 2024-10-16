@@ -1,11 +1,10 @@
+import { StreamerbotClient } from "@streamerbot/client";
+
 // Global variable to hold messages until WebSocket is open
-let messageQueue: any[] = [];
-let tabIdG: number;
 let songQueue: string[] = [];
-console.log(songQueue);
 
 // Initialize WebSocket connection to Streamer.bot
-const ws = new WebSocket("ws://127.0.0.1:8080"); // Your Streamer.bot WebSocket URL
+const client = new StreamerbotClient();
 
 // Listen for the extension installation event
 chrome.runtime.onInstalled.addListener(async () => {
@@ -45,67 +44,18 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
 });
 
-// WebSocket Event Handlers
-ws.onopen = () => {
-  console.log("WebSocket connection established");
-  subscribeToEvents();
-
-  // Send any queued messages once the connection is open
-  flushMessageQueue();
-};
-
-ws.onmessage = (event: MessageEvent) => {
-  let data = JSON.parse(event.data);
-  console.log("Message from server:", data);
-  if (data.data) {
-    data = data.data;
-
-    if (data.func) {
+client.on("General.*", (event) => {
+  if (event.data) {
+    const data = event.data;
+    if (eventHandler.hasOwnProperty(data.func)) {
       eventHandler[data.func](data.variables ? data.variables : null);
     }
   }
-};
+});
+client.on("WebsocketClient.Close", (event) => {
+  console.log("Websocket closed with error: ", event);
+});
 
-ws.onclose = () => {
-  console.log("WebSocket connection closed");
-  subscribeToEvents();
-};
-
-ws.onerror = (error: Event) => {
-  console.error("WebSocket error:", error);
-};
-
-// Function to subscribe to events
-function subscribeToEvents() {
-  ws.send(
-    JSON.stringify({
-      request: "Subscribe",
-      id: "my-subscribe-id",
-      events: {
-        General: ["Custom"],
-      },
-    })
-  );
-}
-function queueCrystalSend(request: any) {
-  // Check WebSocket state before sending
-  if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(request)); // Send the correctly formatted message
-  } else {
-    messageQueue.push(request); // Add message to queue
-  }
-}
-// Function to flush the message queue
-function flushMessageQueue() {
-  while (messageQueue.length > 0) {
-    const message = messageQueue.shift(); // Get the first message in the queue
-    ws.send(JSON.stringify(message)); // Send the message
-  }
-}
-// Handle title updates
-function HandleTitleUpdate(request: { data: any }) {
-  queueCrystalSend(request.data);
-}
 // Event Handlers
 const eventHandler: { [key: string]: (arg?: any) => void } = {
   setVolume: function (volume: string | null) {
@@ -120,20 +70,10 @@ const eventHandler: { [key: string]: (arg?: any) => void } = {
     }, volume);
   },
   addToQueue: function (url: string) {
-    const message = {
-      request: "DoAction", // The type of request
-      action: {
-        id: "d3f3cfe4-6352-42d5-9531-820a5143276e",
-        name: "Handle Reply",
-      },
-      args: {
-        reply: "Successfully added song to queue",
-        meow: "meow",
-      },
-      id: "Handle Reply", // Unique ID for tracking this request
-    };
     if (url) {
-      queueCrystalSend(message);
+      client.doAction("d3f3cfe4-6352-42d5-9531-820a5143276e", {
+        reply: "Successfully added song to queue",
+      });
       songQueue.push(url);
     }
   },
@@ -167,7 +107,27 @@ const eventHandler: { [key: string]: (arg?: any) => void } = {
     }, url);
   },
 };
+
 // Run a function in all active tabs
+/**
+ * Executes a function in all active tabs that match the content script's matches pattern.
+ *
+ * @remarks
+ * This function queries all active tabs that match the content script's matches pattern and executes the provided function in each tab.
+ * The function can accept an optional `variables` parameter, which will be passed to the executed function.
+ *
+ * @param functionToRun - The function to execute in each matching tab.
+ * @param variables - An optional parameter that will be passed to the executed function.
+ *
+ * @returns {Promise<void>} - A promise that resolves when the function completes execution in all matching tabs.
+ *
+ * @example
+ * // Example usage
+ * runInActiveTabs((variables: string) => {
+ *   console.log(variables);
+ *   location.href = variables;
+ * }, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+ */
 async function runInActiveTabs(functionToRun: Function, variables?: any) {
   const manifest = chrome.runtime.getManifest();
   const contentScripts = manifest.content_scripts; // Get content_scripts
@@ -206,6 +166,23 @@ async function runInActiveTabs(functionToRun: Function, variables?: any) {
   }
 }
 
+/**
+ * Throttles a function to prevent it from being called too frequently.
+ *
+ * @param func - The function to throttle.
+ * @param delay - The delay in milliseconds to wait before calling the throttled function.
+ *
+ * @returns A throttled version of the input function.
+ *
+ * @remarks
+ * This function creates a throttled version of the input function. The throttled function will only be called once after the specified delay has passed since the last time it was invoked.
+ * If the throttled function is invoked again before the delay has elapsed, the timer will be reset, and the delay will start again.
+ *
+ * @example
+ * const throttledFunction = throttle(() => console.log("Throttled function called"), 1000);
+ * throttledFunction(); // Will be called immediately
+ * throttledFunction(); // Will not be called again until 1 second has passed
+ */
 function throttle(func: Function, delay: number) {
   let isThrottled = false;
   let lastArgs: any[] | null = null;
@@ -233,6 +210,22 @@ function throttle(func: Function, delay: number) {
 }
 
 // Handle YouTube events
+/**
+ * Handles YouTube events received from the content script.
+ *
+ * @remarks
+ * This function listens for YouTube events such as "ended" and performs specific actions based on the received event.
+ * When the "ended" event is received, it checks if there are songs in the `songQueue` and navigates to the next song if available.
+ *
+ * @param request - The request object containing the YouTube event data.
+ * @param request.data - An array containing the YouTube event data. The first element of the array is the event type.
+ *
+ * @returns {Promise<void>} - A promise that resolves when the function completes.
+ *
+ * @example
+ * // Example usage
+ * HandleYoutubeEvents({ data: ["ended"] });
+ */
 async function HandleYoutubeEvents(request: { data: any[] }) {
   switch (request.data[0]) {
     case "ended":
@@ -243,23 +236,9 @@ async function HandleYoutubeEvents(request: { data: any[] }) {
         }, youtubeLink);
       }
       break;
-    default:
-      break;
   }
 }
-function TestFunction(data: string) {
-  const message = {
-    request: "DoAction", // The type of request
-    action: {
-      id: "4e7b1832-0f85-4811-acc8-bd7dc1767601",
-    },
-    args: {
-      event: data,
-    },
-    id: "Test", // Unique ID for tracking this request
-  };
-  queueCrystalSend(message);
-}
+
 // Listen for messages from the content.js
 chrome.runtime.onMessage.addListener(
   (
@@ -272,14 +251,9 @@ chrome.runtime.onMessage.addListener(
         HandleYoutubeEvents(request);
         break;
       case "titleUpdate":
-        HandleTitleUpdate(request);
-        break;
-      case "test":
-        TestFunction(request.data);
+        client.doAction("e4b9e04a-5afb-4dbb-8724-a63e9c3c6e1c", request.data);
+
         break;
     }
   }
 );
-
-// Periodically subscribe to events
-setInterval(subscribeToEvents, 20000);
