@@ -1,5 +1,7 @@
+import { secondsToMinutes } from "./Functions/MultiUseFunctions";
+
 let lastVideoTitle = ""; // Variable to track the last video title
-let debounceTimer: NodeJS.Timeout | null = null; // Timer for debounce
+let debounceTimer: ReturnType<typeof setTimeout> | null = null; // Timer for debounce
 const DEBOUNCE_DELAY = 1000; // Adjust delay as needed
 
 /**
@@ -24,7 +26,7 @@ const DEBOUNCE_DELAY = 1000; // Adjust delay as needed
 function debounce<T extends (...args: any[]) => void>(func: T, delay: number) {
   return function (this: any, ...args: Parameters<T>) {
     if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => func.bind(this)(...args), delay);
+    debounceTimer = setTimeout(() => func.apply(this, args), delay);
   };
 }
 
@@ -49,22 +51,47 @@ const interval = setInterval(() => {
 function setEventListeners(video: HTMLVideoElement) {
   // Listener for when the video ends
   video.addEventListener("ended", (event) => {
-    chrome.runtime.sendMessage({
-      type: "youtubeEvent",
-      data: [event.type],
+    try {
+      chrome.runtime?.sendMessage({
+        type: "youtubeEvent",
+        data: [event.type],
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  });
+  video.addEventListener("timeupdate", (event) => {
+    chrome.runtime?.sendMessage({
+      type: "youtubeTimeEvent",
+      data: ["youtubeEvent", `${secondsToMinutes(video.currentTime)} / ${secondsToMinutes(video.duration)}`],
     });
   });
+  video.addEventListener("play", () => {
+    try {
+      chrome.runtime?.sendMessage({
+        type: "youtubeEvent",
+        data: ["play"],
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  });
 
-  // video.addEventListener("volumechange", (event) => {
-  //   const volumePanel = document.querySelector(".ytp-volume-panel");
-  //   const volume = volumePanel
-  //     ? parseFloat(volumePanel.ariaValueNow ?? "0") / 100
-  //     : 0;
-  //   chrome.runtime.sendMessage({
-  //     type: "youtubeEvent",
-  //     data: [event.type, volume],
-  //   });
-  // });
+  video.addEventListener("volumechange", (event) => {
+    try {
+      const volumePanel = document.querySelector(".ytp-volume-panel");
+      const volume = volumePanel
+        ? parseFloat(volumePanel.ariaValueNow ?? "0") / 100
+        : 0;
+
+      chrome.runtime?.sendMessage({
+        type: "youtubeEvent",
+        data: [event.type, volume],
+      });
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  });
 }
 
 /**
@@ -94,11 +121,8 @@ function onVideoLoad() {
       };
 
       // Send the message to the background script
-      chrome.runtime
-        .sendMessage({ type: "titleUpdate", data: message })
-        .catch((error) => {
-          console.log("Error sending message to background script:", error);
-        });
+
+      chrome.runtime?.sendMessage({ type: "titleUpdate", data: message });
     }
   }
 }

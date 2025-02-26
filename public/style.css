@@ -1,0 +1,91 @@
+body {
+  background-color: rgb(26, 25, 25);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: #232e33;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1ca1d1;
+  border-radius: 3px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  body {
+    scrollbar-color: #6baf8d #232e33;
+  }
+}
+.hidden {
+  display: none !important;
+}
+.songRequestBody {
+  background-color: rgb(37, 35, 35);
+  padding: 25px;
+  padding-top: 5px;
+}
+ul {
+  background-color: rgb(48, 45, 45);
+  min-height: 250px;
+  max-height: 250px;
+  min-width: 250px;
+  padding-top: 15px;
+  padding-left: 25px;
+  padding-right: 25px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+#currentSong {
+  justify-content: space-evenly;
+  border-bottom: #2980c3 2px solid;
+  width: 100%;
+  gap: 0;
+}
+#songRequester {
+  border-left: rgb(73, 65, 65) 2px solid;
+  padding-left: 10px;
+  overflow: hidden;
+}
+li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.stringDiv {
+  display: flex;
+  gap: 10px;
+}
+p {
+  overflow: hidden;
+  max-width: 120px;
+}
+
+.transparentButton {
+  background-color: transparent;
+  border: none;
+}
+.transparentButton:hover {
+  cursor: pointer;
+}
+
+.headerContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.headerContainer button {
+  max-height: 25px;
+  background-color: transparent;
+  border: none;
+}
+.buttonDiv {
+  display: flex;
+  width: 5px;
+  flex-wrap: wrap;
+}

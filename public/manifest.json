@@ -13,6 +13,12 @@
     "default_icon": "icon.png",
     "default_popup": "popup.html"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["requestPermission.html", "js/requestPermission.ts"],
+      "matches": ["*://*/*"]
+    }
+  ],
 
   "content_scripts": [
     {
@@ -30,11 +36,17 @@
     "storage",
     "activeTab",
     "scripting",
-    "tabs"
+    "tabs",
+    "background"
   ],
 
-  "host_permissions": ["https://www.youtube.com/*", "ws://127.0.0.1:8080/"],
+  "host_permissions": [
+    "https://vaccie.pythonanywhere.com/*",
+    "https://www.youtube.com/*",
+    "ws://127.0.0.1:8080/",
+    "https://youtube.googleapis.com/*"
+  ],
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; connect-src 'self' ws://127.0.0.1:8080 https://www.youtube.com"
+    "extension_pages": "default-src 'self'; connect-src 'self' ws://127.0.0.1:8080 ws://127.0.0.1:3344 ws://localhost:3344 https://vaccie.pythonanywhere.com https://www.youtube.com https://youtube.googleapis.com https://www.googleapis.com"
   }
 }

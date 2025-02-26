@@ -2,6 +2,9 @@ const webpack = require("webpack");
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const srcDir = path.join(__dirname, "..", "src");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 module.exports = {
   entry: {
@@ -34,10 +37,17 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
   },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js"],
+    fallback: { crypto: false, os: false, path: false },
+  },
   plugins: [
     new CopyPlugin({
       patterns: [{ from: ".", to: "../", context: "public" }],
       options: {},
+    }),
+    new webpack.DefinePlugin({
+      "process.env.API_KEY": JSON.stringify(process.env.API_KEY),
     }),
   ],
 };

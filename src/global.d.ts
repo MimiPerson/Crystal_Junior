@@ -1,1 +1,1 @@
-declare var StreamerbotClient: any;
+// declare var StreamerbotClient: any;
