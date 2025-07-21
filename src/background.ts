@@ -4,16 +4,7 @@ import { HandleYoutubeEvents } from "./Functions/Youtube/EventHandler";
 import "./Functions/CrystalWebsocket/Websocket";
 import { wsSend } from "./Functions/CrystalWebsocket/Websocket";
 
-export const ws = new WebSocket("ws://localhost:3344");
 
-ws.onopen = () => {
-  console.log("Connected to server");
-  ws.send(JSON.stringify("Hello from client"));
-};
-
-ws.onmessage = (message) => {
-  console.log("Received message", JSON.parse(message.data));
-};
 
 // Global variable to hold messages until WebSocket is open
 
@@ -82,9 +73,9 @@ chrome.runtime.onMessage.addListener(
   ) => {
     switch (request.type) {
       case "youtubeTimeEvent":
-        // console.log(request.data);
-        // wsSend(JSON.stringify({ event: "youtubeTimeUpdate", data: request.data }));
+        wsSend(JSON.stringify({ event: "youtube.TimeEvent", data: request.data }));
         break;
+      
       case "youtubeEvent":
         HandleYoutubeEvents(request);
         break;
@@ -92,9 +83,7 @@ chrome.runtime.onMessage.addListener(
         chrome.storage.local.set({
           currentSong: request.data.youtubeTitle,
         });
-        wsSend(
-          JSON.stringify({ event: "youtubeTitleUpdate", data: request.data })
-        );
+        wsSend(JSON.stringify({ event: "youtube.TitleUpdate", data: request.data }));
         doAction("e4b9e04a-5afb-4dbb-8724-a63e9c3c6e1c", request.data);
         break;
     }

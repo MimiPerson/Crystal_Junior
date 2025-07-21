@@ -9,7 +9,7 @@ import { eventHandler } from "./EventHandler";
  * @param input Youtube URL
  * @returns Youtube ID string
  */
-function extractYouTubeId(input: string) {
+export function extractYouTubeId(input: string) {
   const regex =
     /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const match = input.match(regex);

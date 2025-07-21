@@ -1,4 +1,3 @@
-import { wsSend } from "../CrystalWebsocket/Websocket";
 import { runInActiveTabs } from "../MultiUseFunctions";
 import { doAction } from "../Streamerbot/Client";
 
